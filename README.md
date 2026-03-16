@@ -215,6 +215,30 @@ Key packages (see `requirements.txt` for full list):
 
 ---
 
+## 🗺️ Roadmap
+
+This project is actively being developed. Here's what's planned next:
+
+### 🔧 In Progress / Planned by Author
+
+- **Human-in-the-Loop Review** — Allow the student or instructor to flag incorrect answers, correct them, and feed that feedback back into the system to improve future responses (the `IndexFactory` already has a commented-out hook for this)
+- **Folder / Batch Ingestion** — Process an entire folder of PDFs at once, so a student can upload a full semester's worth of lecture slides and query across all of them in one session
+- **More Task Types** — Expand beyond Q&A, summaries, and quizzes — e.g., flashcard generation, concept mapping, essay outline drafting, or exam question prediction
+
+### 💡 Ideas for Future Improvements
+
+- **Multi-Subject Cross-Search** — Query across multiple subjects simultaneously (e.g., "How does TF-IDF in NLP relate to what I learned in my Statistics course?")
+- **Spaced Repetition Scheduler** — Track which quiz questions the student got wrong and re-surface them at optimal intervals using a spaced repetition algorithm (like Anki)
+- **Difficulty Progression** — Automatically adjust quiz difficulty over time based on the student's performance history
+- **Concept Graph** — Visualize the relationships between key concepts in the uploaded material as an interactive knowledge graph
+- **Voice Input / Output** — Let students ask questions by voice and receive spoken answers, useful for studying on the go
+- **Study Session Analytics** — A dashboard showing the student's progress over time: topics covered, quiz scores, weak areas, and time spent
+- **Multilingual Support** — Parse and answer questions in languages other than English, useful for students studying in non-English universities
+- **Collaborative Study Rooms** — Let multiple students share the same indexed material and see each other's questions and the mentor's answers in real time
+- **Export Study Pack** — Generate a downloadable study pack (PDF or Word doc) combining the summary, key formulas, and a practice quiz for offline revision
+
+---
+
 ## 📄 License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
