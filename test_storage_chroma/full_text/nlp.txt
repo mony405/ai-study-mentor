@@ -1,0 +1,1553 @@
+
+# Representing Text with Vectors
+
+# Machine Learning for Natural Language Processing, ENSAE 2022
+
+# Lecture 2
+
+Benjamin Muller, INRIA Paris
+
+1
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Lectures Outline
+
+1. The Basics of Natural Language Processing (February 1st)
+2. Representing Text with Vectors (February 1st)
+3. Deep Learning Methods for NLP (February 8th)
+4. Language Modeling (February 8th)
+5. Sequence Labelling (Sequence Classification) (February 15th)
+6. Sequence Generation Tasks (February 15th)
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Today Lecture Outline
+
+- Representing Words in Vectors
+- Representing Documents in Vectors
+
+# Representation Techniques
+
+- Hand-Crafted Feature-Based Representation
+- Count-Based Representation
+- Prediction-Based Representation
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Framework
+
+We assume:
+
+- A token is the basic unit of discrete data, defined to be an item from a vocabulary indexed by 1, ..., V.
+- A document is a sequence of N words denoted by d = (w1, w2, ..., wN), where wn is the Nth word in the sequence.
+- A corpus is a collection of M documents denoted by D = (d1, d2, ..., dM)
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Framework
+
+We assume:
+
+- A token is the basic unit of discrete data, defined to be an item from a vocabulary indexed by 1, ..., V.
+- A document is a sequence of N words denoted by d = (w1,w2, ...,wN), where wn is the Nth word in the sequence.
+- A corpus is a collection of M documents denoted by D = (d1, d2, ..., dM)
+
+In this lecture, a token will be a word
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# What is a word?
+
+There are many ways to define a word based on what aspect of language we consider (typography, syntax, semantics…)
+
+# Definition (Semantic):
+
+Words are the smallest linguistic expressions that are conventionally associated with a non-compositional meaning and can be articulated in isolation to convey semantic content.*
+
+*Stanford Encyclopedia of Philosophy
+
+6
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Objective
+
+Given a vocabulary w1,..,wV and a corpus D, our goal is to associate each word with a representation?
+
+# What do we want from this representation?
+
+- identify a word (bijection)
+- capture the similarities of words (based on morphology, syntax, semantics,...)
+- Help us solve downstream tasks
+
+NB: Vector-based representations of text are called embedding
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# 1-Hot Encoding
+
+Traditional way to represent words as atomic symbols with a unique integer associated with each word:
+
+| 1 | movie  |
+| - | ------ |
+| 2 | hotel  |
+| 3 | apple  |
+| 4 | movies |
+| 5 | art    |
+
+Equivalent to represent words as 1-hot vectors:
+
+| movie  | \[1, 0, 0, 0, 0] |
+| ------ | ---------------- |
+| hotel  | \[0, 1, 0, 0, 0] |
+| apple  | \[0, 0, 1, 0, 0] |
+| movies | \[0, 0, 0, 1, 0] |
+| art    | \[0, 0, 0, 0, 1] |
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# 1-Hot Encoding
+
+Most basic representation of any textual unit in NLP. Always start with it.
+
+Implicit assumption: word vectors are an orthonormal basis
+
+- orthogonal
+- normalized
+
+# Problem 1: Not very informative
+
+➔ Weird to consider “movie” and “movies” as independent entities or to consider all words equidistant:
+
+ǁ house − home ǁ = ǁ house − carǁ
+
+# Problem 2: Polysemy
+
+➔ Should the Mouse of a computer get the same vector as the mouse animal?
+
+9
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Hand-Crafted Feature Representation
+
+Example of potential features:
+
+- Morphology: prefix, suffix, stem...
+- Grammar: part of speech, gender, number,...
+- Shape: capitalization, digit, hyphen
+
+Those features can be defined based on relations to other words:
+
+- Synonyms of…
+- Hypernyms of…
+- Antonyms of...
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Hand-Crafted Feature Representation
+
+# Example of potential features:
+
+- Morphology: prefix, suffix, stem...
+- Grammar: part of speech, gender, number,...
+- Shape: capitalization, digit, hyphen
+
+# Those features can be defined based on relations to other words
+
+- Synonyms of…
+- Hypernyms of…
+- Antonyms of...
+
+We present one popular hand-crafted semantically based representation of words ⇒ the WordNet
+
+11
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# WordNet
+
+Definition: a (word) sense is a discrete representation of one aspect of the meaning of a word
+
+WordNet is a large lexical database of word senses for English and other languages
+
+
+
+
+
+# Representing Text with Vectors - Machine Learning for NLP
+
+# ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# WordNet
+
+- Word types are grouped into (cognitive) synonym sets: synsets
+- S09293800={Earth, earth, world, globe}
+- Polysemous words: assigned to different synsets
+- S14867162 ={earth, ground}
+- Contains glosses for synsets: the 3rd planet from the sun; the planet we live on
+- Noun/verb synsets: organized in hierarchy, capturing IS-A relation
+- apple IS-A fruit
+
+13
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# WordNet
+
+X is a hyponym of Y if X is an instance of Y:
+
+cat is a hyponym of animal
+
+X is a hypernym of Y if Y is an instance of X:
+
+animal is a hypernym of cat
+
+X and Y are co-hyponyms if they have the same hypernym:
+
+cat and dog are co-hyponyms
+
+X is a meronym of Y if X is a part of Y:
+
+wheel is a meronym of car
+
+X is a holonym of Y if Y is a part of X:
+
+car is a holonym of wheel
+
+14
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# WordNet
+
+Similarity between S1 and S2 = 1 / length(path(S1, S2))
+
+Idea: The shorter the hypernym/hyponym path from one synset to another the higher is the similarity
+
+Similarity between S1, S2 Words:
+
+- w1S1
+- w2S2
+
+Example: sim(dog, cat) = ? 👉 notebook
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Hand-Crafted Representations: Limits
+
+- Requires a lot of human annotations
+- Subjectivity of the annotators
+- Does not adapt to new words (languages are not stationary!):
+- Mocktail, Guac, Fave, Biohacking were added to the Merriam-Webster Dictionary in 2018
+- It does not scale easily to new languages, new concepts, new words...
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# How to Infer “Good” Representations with Data?
+
+# Distributional Hypothesis
+
+“You shall know a word by the company it keeps” Firth (1957)
+
+Idea: Model the context of a word to build its vectorial representation
+
+17
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Example: What is the meaning of “Bardiwac” ?
+
+18
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Example: What is the meaning of “Bardiwac” ?
+
+He handed her a glass of bardiwac.
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Example: What is the meaning of “Bardiwac” ?
+
+- He handed her a glass of bardiwac.
+- Beef dishes are made to complement the bardiwacs.
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Example: What is the meaning of “Bardiwac” ?
+
+- He handed her a glass of bardiwac.
+- Beef dishes are made to complement the bardiwacs.
+- Nigel staggered to his feet, face flushed from too much bardiwac.
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Example: What is the meaning of “Bardiwac” ?
+
+- He handed her a glass of bardiwac.
+- Beef dishes are made to complement the bardiwacs.
+- Nigel staggered to his feet, face flushed from too much bardiwac.
+- Malbec, one of the lesser-known bardiwac grapes, responds well to Australia’s sunshine.
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Example: What is the meaning of “Bardiwac” ?
+
+- He handed her a glass of bardiwac.
+- Beef dishes are made to complement the bardiwacs.
+- Nigel staggered to his feet, face flushed from too much bardiwac.
+- Malbec, one of the lesser-known bardiwac grapes, responds well to Australia’s sunshine.
+- I dined off bread and cheese and this excellent bardiwac.
+
+23
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Example: What is the meaning of “Bardiwac” ?
+
+- He handed her a glass of bardiwac.
+- Beef dishes are made to complement the bardiwacs.
+- Nigel staggered to his feet, face flushed from too much bardiwac.
+- Malbec, one of the lesser-known bardiwac grapes, responds well to Australia’s sunshine.
+- I dined off bread and cheese and this excellent bardiwac.
+- The drinks were delicious: blood-red bardiwac as well as light, sweet Rhenish.
+
+24
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Example: What is the meaning of “Bardiwac” ?
+
+- He handed her a glass of bardiwac.
+- Beef dishes are made to complement the bardiwacs.
+- Nigel staggered to his feet, face flushed from too much bardiwac.
+- Malbec, one of the lesser-known bardiwac grapes, responds well to Australia’s sunshine.
+- I dined off bread and cheese and this excellent bardiwac.
+- The drinks were delicious: blood-red bardiwac as well as light, sweet Rhenish.
+
+→ bardiwac is a heavy red alcoholic beverage made from grapes
+
+25
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Distributional word representation in a nutshell
+
+1. Define what is the context of a word
+2. Count how many times each target word occurs in this context
+3. Build vectors out of (a function of) these context occurrence counts
+
+= f (, Context(w ))
+
+26
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# How to define “the context” of a word?
+
+It can be defined as
+
+- The surrounding words (left and right words)
+- All the other words of the sentence/the paragraph
+- All the words after preprocessing and filtering-out some words
+
+27
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# How to Model the Context to get
+
+# = f (, Context(w ))
+
+# Approach 1: Count-Based
+
+1. Measure frequency of words in the context for each word in the vocabulary
+2. Define vector representations based on those frequency
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# How to Model the Context to get
+
+# = f (, Context(w ))
+
+# Approach 1: Count-Based
+
+1. Measure frequency of words in the context for each word in the vocabulary
+2. Define vector representations based on those frequency
+
+# Approach 2: Prediction Based
+
+29
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Counting the Occurrences of the words in the context of dog
+
+|                               | barked | ++ |
+| ----------------------------- | ------ | -- |
+| The dog barked in the park.   | park   | +  |
+| The owner of the dog put him  | owner  | +  |
+| on the leash since he barked. | leash  | +  |
+
+# dog
+
+co-occurrence
+
+30
+
+
+
+
+
+# Representing Text with Vectors - Machine Learning for NLP
+
+# ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Co-Occurrence Matrix
+
+|       | leash | walk | run | owner | pet | barked |
+| ----- | ----- | ---- | --- | ----- | --- | ------ |
+| dog   | 3     | 5    | 2   | 5     | 3   | 2      |
+| cat   | 0     | 3    | 3   | 2     | 3   | 0      |
+| lion  | 0     | 3    | 2   | 0     | 1   | 0      |
+| light | 0     | 0    | 0   | 0     | 0   | 0      |
+| bark  | 1     | 0    | 0   | 2     | 1   | 0      |
+| car   | 0     | 0    | 1   | 3     | 0   | 0      |
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Define vector representation based on the Co-Occurrence
+
+|       | leash | walk | run | owner |
+| ----- | ----- | ---- | --- | ----- |
+| dog   | 3     | 5    | 2   | 5     |
+| lion  | 0     | 3    | 2   | 0     |
+| light | 0     | 0    | 0   | 0     |
+| bark  | 1     | 0    | 0   | 2     |
+| car   | 0     | 0    | 1   | 3     |
+
+Naïve Approach: Take the row of the co-occurrence matrix
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Define vector representation based on the Co-Occurrence
+
+|       | leash | walk | run | owner |
+| ----- | ----- | ---- | --- | ----- |
+| dog   | 3     | 5    | 2   | 5     |
+| lion  | 0     | 3    | 2   | 0     |
+| light | 0     | 0    | 0   | 0     |
+| bark  | 1     | 0    | 0   | 2     |
+| car   | 0     | 0    | 1   | 3     |
+
+# Limits:
+
+- Representations depends on the size of the corpus
+- Frequent words impacts a lot the representations
+- Representations very sensitive to change in very infrequent words
+
+33
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Solution: Pointwise Mutual Information (PMI)
+
+Idea: Instead of absolute co-occurrence statistics, use probability (relative) of co-occurrences
+
+P M I(w1, w2) = log       P (w1, w2)
+
+P (w1)P (w2)
+
+34
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Solution: Pointwise Mutual Information (PMI)
+
+Idea: Instead of absolute co-occurrence statistics, use probability (relative) of co-occurrences
+
+PMI(w1, w2) = log
+
+P(w1, w2)
+
+P(w1)P(w2)
+
+# Intuition
+
+- The more dependent dog and cat the closer P(dog, cat) is from P(dog)P(cat) the smaller the PMI
+
+35
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Solution: Pointwise Mutual Information (PMI)
+
+Idea: Instead of absolute co-occurrence statistics, use probability (relative) of co-occurrences
+
+PMI(w1, w2) = log
+P(w1, w2)
+P(w1)P(w2)
+
+# Intuition
+
+- The more dependent dog and cat the closer P(dog, cat) is from P(dog)P(cat) the smaller the PMI
+
+PMI(w1, w2) = log
+1
+npairs
+1
+j#{w1}−1r
+nword
+d #{w2}
+
+36
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Pointwise Mutual Information (PMI)
+
+|     | leash | walk | run  | owner |      |
+| --- | ----- | ---- | ---- | ----- | ---- |
+| pet | dog   | 2.75 | 2.24 | 3.16  | 2.24 |
+|     | lion  | 0    | 2.75 | 3.16  | 0    |
+|     | car   | 0    | 0    | 3.85  | 2.75 |
+|     |       | 0    | 0    | 2.75  |      |
+
+Word embedding vectors are the row of the PMI matrix
+
+- We take usually take the Positive PMI (assigned to 0 when negative) + Smooth unobserve pairs (Laplace smoothing: add 1)
+- Does not depend on size of the corpus (the PMI is normalized)
+- Much less sensitive to change in frequent words (log)
+
+37
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Pointwise Mutual Information (PMI)
+
+# Limits:
+
+- Very large matrix O(V2) ! Very large word vectors
+- Hard to use large vectors in practice (i.e. 1M word vocabulary)
+- Cannot compare word vectors estimated on 2 different corpora unless they have exactly the same vocabulary!
+
+# Idea:
+
+Build vectors with predefined size based on the PMI matrix
+
+➔ Dimensionality Reduction Technique
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Singular Value Decomposition (SVD)
+
+We can decompose the PMI Matrix with SVD
+
+1. We build a symmetric definite matrix based on the PMI
+2. We decompose it P with the SVD
+3. U is of size (V, d) gives us the representation of each word in a latent/embedding space
+
+# Properties of SVD:
+
+- U is a orthonormal matrix
+- U aggregates the highest variance of the original word embeddings
+
+39
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+# Limits of Dimensionality Reduction Approach
+
+- Need to store a matrix of size O(V2)
+- SVD is O(V*d2)
+
+➔ It is inefficient to build a very large matrix for reducing: Can we do both simultaneously?
+
+# Solution: Prediction-Based Word Embedding Approaches
+
+40
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Prediction-Based Model
+
+# Idea:
+
+- Learn directly dense word vectors
+- Using the distributional hypothesis
+- Implicitly, by parameterizing words as dense vectors
+- and learning to predict context using this parametrization
+
+Many word embedding methods use these ideas successfully
+
+We present the word2vec skip-gram model (one of the most popular)
+
+41
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Word2Vec Skip-Gram Model
+
+1. For each Sentence
+2. Sample a target word
+3. Predict context words defined as words in a fixed window from the target word
+
+my dog is barking and chasing its tail
+
+42
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Word2Vec Skip-Gram Model
+
+1. For each Sentence
+2. Sample a target word
+3. Predict context words defined as words in a fixed window from the target word
+
+my dog is barking and chasing its tail
+
+43
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Word2Vec Skip-Gram Model
+
+Given d  N, let W R(V,d) and C R(V,d) two word representations (or word embedding) matrices. For each sequence (w1, .., wT):
+
+- Pick a focus word w, associated to the vector w  Rd (w is the row associated to w in W)
+- Pick a context word c, associated to the vector c  Rd (c is the row associated to c in C)
+
+Maximize  max  log p(c|w) (maximum likelihood estimator)
+
+W R(V,d),C R(V,d)
+
+my dog is barking and chasing its tail
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Word2Vec Skip-Gram Model
+
+1. How to define log p(c|w)?
+2. How to optimize log p(c|w)?
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Word2Vec Skip-Gram Model
+
+1. How to define log p(c|w)?
+2. How to optimize log p(c|w)?
+
+# Intuition
+
+- This is a classification problem
+- The labels we want to predict are the context words
+- Classification with a very large number of labels (V~100K)
+
+# Ideas:
+
+- Softmax
+- Simplify the softmax with Negative Sampling for Efficiency
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Word2Vec Skip-Gram Model
+
+Softmax of dot-products
+
+p(c|w) = ew.c / ∑v ew.v
+
+context vs. words vectors:
+
+We compute the log-likelihood, our objective function, as:
+
+log p(c|w) = w.c − log ∑w ew.v
+
+Limits: O(V) to compute the loss (at every iteration)
+
+# Negative Sampling
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Word2Vec Skip-Gram Model: Negative Sampling
+
+Idea: Instead of computing the probability objective over the entire vocabulary (all the V-1 negative context words)
+
+➔ We sample K words that are not in the context of w (K&#x3C;<v)< p="">
+
+</v)<>
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Word2Vec Skip-Gram Model: Negative Sampling
+
+Idea: Instead of computing the probability objective over the entire vocabulary (all the V-1 negative context words)
+
+➔ We sample K words that are not in the context of w (K&#x3C;<v)< p="">
+</v)<>
+# New objective function:
+
+σ(w, c) + K ∑ log σ(-w, v) with σ(x,) =
+
+1 / (1 + e-x.y)
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Word2Vec Skip-Gram Model: Negative Sampling
+
+Idea: Instead of computing the probability objective over the entire vocabulary (all the V-1 negative context words)
+
+➔ We sample K words that are not in the context of w (K&#x3C;&#x3C;V)
+
+# New objective function:
+
+σ(w, c) + K ∑ log σ(-w, v) with σ(x,) =
+
+1 / (1 + e-x.y)
+
+Complexity? 50
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Word2Vec Skip-Gram Model: Negative Sampling
+
+Idea: Instead of computing the probability objective over the entire vocabulary (all the V-1 negative context words)
+
+➔ We sample K words that are not in the context of w (K&#x3C;<v)< p="">
+</v)<>
+# New objective function:
+
+σ(w, c) + K ∑ log σ(-w, v) with σ(x,) = 1 / (1 + e-x.y)
+
+➔ O(K) to compute with K independent of V
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Word2Vec Model: Optimization
+
+# Algorithm 1 Skip-Gram Word2vec Training
+
+Given a corpus C, made of a set of unique tokens V. Hyperparameters: number of negative samples K, a window size l, dimension of word vectors d, learning rate (αt)
+
+Initialize Randomly: WR(V,d) and CR(V,d)
+
+for step t in 0..T do
+### Step 1: Sampling
+Sample s = (w1, .., wn)  C # a sequence in your corpus (e.g. sentence)
+Sample a pair (i, j)  [1, ., n] with |i − j| ≤ l
+we note w = wi, c = wj represented by vectors w in W and c in C
+Sample NK = {v1, ., vK} ⊂ V represented by {v1, .., vK} in C # Negative samples
+### Step 2: Compute loss
+l(W, C) = −σ(w, c) − 1 ∑nN, log σ(-w, v)
+### Step 3: Parameter update with SGD
+Wt = Wt−1 − αt . l(Wt−1, Ct−1)
+Ct = Ct−1 − αt . l(Wt−1, Ct−1)
+
+52
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Word2Vec Model: Optimization
+
+# Algorithm 1 Skip-Gram Word2vec Training
+
+Given a corpus C, made of a set of unique tokens V. Hyperparameters: number of negative samples K, a window size l, dimension of word vectors d, learning rate (αt)
+
+Initialize Randomly: WR(V,d) and CR(V,d)
+
+for step t in 0..T do
+
+- Step 1: Sampling
+- Sample s = (w1, .., wn) ∈ C # a sequence in your corpus (e.g. sentence)
+- Sample a pair (i, j) ∈ [1, ., n] with |i − j| ≤ l
+- we note w = wi, c = wj represented by vectors w in W and c in C
+- Sample NK = {v1, ., vK} ⊂ V represented by {v1, .., vK} in C # Negative samples
+- Step 2: Compute loss
+l(W, C) = −σ(w, c) − 1 ∑nN log σ(-w, v)
+- Step 3: Parameter update with SGD
+Wt = Wt−1 − αt l(Wt−1, Ct−1)
+
+Ct = Ct−1 − αt l(Wt−1, Ct−1)
+
+53
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Word2Vec Model: Optimization
+
+# Algorithm 1 Skip-Gram Word2vec Training
+
+Given a corpus C, made of a set of unique tokens V. Hyperparameters: number of negative samples K, a window size l, dimension of word vectors d, learning rate (αt)
+
+Initialize Randomly: WR(V,d) and CR(V,d)
+
+for step t in 0..T do
+
+- Step 1: Sampling
+- Sample s = (w1, .., wn) ∈ C # a sequence in your corpus (e.g. sentence)
+- Sample a pair (i, j) ∈ [1, ., n] with |i − j| ≤ l
+- we note w = wi, c = wj represented by vectors w in W and c in C
+- Sample NK = {v1, ., vK} ⊂ V represented by {v1, .., vK} in C # Negative samples
+- Step 2: Compute loss
+l(W, C) = −σ(w, c) − 1 ∑nN, log σ(-w, v)
+- Step 3: Parameter update with SGD
+Wt = Wt−1 − αt l(Wt−1, Ct−1)
+
+Ct = Ct−1 − αt l(Wt−1, Ct−1)
+
+54
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Word2Vec Model: Optimization
+
+# Algorithm 1 Skip-Gram Word2vec Training
+
+Given a corpus C, made of a set of unique tokens V. Hyperparameters: number of negative samples K, a window size l, dimension of word vectors d, learning rate (αt)
+
+Initialize Randomly: WR(V,d) and CR(V,d)
+
+# for step t in 0..T do
+
+# Step 1: Sampling
+
+Sample s = (w1, .., wn) ∈ C # a sequence in your corpus (e.g. sentence)
+
+Sample a pair (i, j) ∈ [1, ., n] with |i − j| ≤ l
+
+we note w = wi, c = wj represented by vectors w in W and c in C
+
+Sample NK = {v1, ., vK} ⊂ V represented by {v1, .., vK} in C # Negative samples
+
+# Step 2: Compute loss
+
+l(W, C) = −σ(w, c) − 1 ∑nN log σ(-w, v)
+
+# Step 3: Parameter update with SGD
+
+Wt = Wt−1 − αt l(Wt−1, Ct−1)
+
+Ct = Ct−1 − αt l(Wt−1, Ct−1)
+
+55
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Word2Vec Model: Optimization
+
+# Algorithm 1 Skip-Gram Word2vec Training
+
+Given a corpus C, made of a set of unique tokens V. Hyperparameters: number of negative samples K, a window size l, dimension of word vectors d, learning rate (αt)
+
+Initialize Randomly: WR(V,d) and CR(V,d)
+
+for step t in 0..T do
+
+- Step 1: Sampling
+- Sample s = (w1, .., wn) ∈ C # a sequence in your corpus (e.g. sentence)
+- Sample a pair (i, j) ∈ [1, ., n] with |i − j| ≤ l
+- we note w = wi, c = wj represented by vectors w in W and c in C
+- Sample NK = {v1, ., vK} ⊂ V represented by {v1, .., vK} in C # Negative samples
+- Step 2: Compute loss
+l(W, C) = −σ(w, c) − 1 ∑nN, log σ(-w, v)
+- Step 3: Parameter update with SGD
+Wt = Wt−1 − αt . l(Wt−1, Ct−1)
+
+Ct = Ct−1 − αt . l(Wt−1, Ct−1)
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Word2Vec Model: Optimization
+
+# Idea:
+
+Loop over the dataset times (number of epochs)
+
+Complexity: O(d*K*T)
+
+# Algorithm 1 Skip-Gram Word2vec Training
+
+Given a corpus C, made of a set of unique tokens V. Hyperparameters: number of negative samples K, a window size l, dimension of word vectors d, learning rate (αt)
+
+# Initalize Randomly:
+
+W R(V,d) and C R(V,d)
+
+# for step t in 0..T do
+
+# ### Step 1: Sampling
+
+- ➔ No Memory bottleneck
+- Sample s = (w1, .., wn)  C # a sequence in your corpus (e.g. sentence)
+- Sample a pair (i, j)  [1, ., n] with |i − j| ≤ l
+- ➔ Scale to Billion-tokens datasets
+- we note w = wi, c = wj represented by vectors w in W and c in C
+- Sample NK = {v1, ., vK} ⊂ V represented by {v1, ., vK} in C # Negative samples
+
+# ### Step 2: Compute loss
+
+l(W, C) = −σ(w, c) − 1 ∑v NK log σ(-w, v)
+
+# ### Step 3: Parameter update with SGD
+
+Wt = Wt−1 − αt.  l(Wt−1, Ct−1)
+
+Ct = C−1 − αt. l(Wt−1, Ct−1)
+
+end
+
+57
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Word2Vec Skip-Gram Model &#x26; the PMI
+
+(Levy &#x26; Goldberg 2014) showed that
+
+- Estimating the embedding matrix with Skip-Gram and Negative Sampling (SGNS)…
+- …is equivalent to computing the shifted-PMI matrix
+
+58
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+# Word2Vec Skip-Gram Model &#x26; the PMI
+
+(Levy &#x26; Goldberg 2014) showed that
+
+- Estimating the embedding matrix with Skip-Gram and Negative Sampling (SGNS)…
+- …is equivalent to computing the shifted-PMI matrix
+
+SGNS = Wi · j = i ·  = PM I(wi, c) − lok
+
+M SG
+
+59
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Word2Vec
+
+- Still very popular in practice
+- Works very well with Deep Learning architecture (e.g. LSTM models) to model specific tasks (e.g. NER)
+- Recently “beaten” by contextualized approaches (BERT)
+
+# Extensions
+
+- Lots of variant of the Skip-Gram exists (CBOW, Glove…)
+- Multilingual setting: build shared representations across languages (fastext)
+
+# Limits
+
+- Doesn’t model morphology
+- Fixed Vocabulary: What if we add new tokens in the vocabulary?
+- Polysemy: Each token has a unique representation (e.g. cherry)
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Evaluation of Word Embeddings
+
+# How to evaluate the quality of word embeddings?
+
+# Extrinsic Evaluation
+
+- Use them in a task-specific model and measure the performance on your task (cf. lecture 5 &#x26; 6)
+
+# Intrinsic Evaluation
+
+➔ Idea: “similar” words should have similar vectors
+
+# What do we mean by “similar” words?
+
+- Morphologically similar: e.g. computer, computers
+- Syntactically similar: e.g. determiners
+- Semantically similar: e.g. animal, cat
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Intrinsic Evaluation of Word Embeddings
+
+# How to evaluate the quality of word embeddings?
+
+# Qualitative Evaluation
+
+- Visualize word embedding space
+- Case by case: look at nearest neighbors of given words
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Intrinsic Evaluation of Word Embeddings
+
+# How to evaluate the quality of word embeddings?
+
+# Qualitative Evaluation
+
+- Visualize word embedding space
+- Case by case: look at nearest neighbors of given words
+
+# Quantitative Evaluation
+
+- Is Word embedding similarity related with human judgment?
+
+63
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Intrinsic Evaluation of Word Embeddings
+
+# How to evaluate the quality of word embeddings?
+
+# Qualitative Evaluation
+
+- Visualize word embedding space
+- Case by case: look at nearest neighbors of given words
+
+# Quantitative Evaluation
+
+- Is Word embedding similarity related with human judgment?
+
+👉 notebook
+
+64
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Intrinsic Evaluation of Word Embeddings
+
+# Visualization
+
+Word Vectors are high dimensions (usually ~100)
+
+- Project the word embedding vectors using PCA or T-SNE
+- Visualize in 2D or 3D
+- Analyse the clusters
+
+65
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Intrinsic Evaluation of Word Embeddings
+
+madrid ➔ 👉 notebook 2
+
+| 1-   | ropazis   | london | animal       | lizard |
+| ---- | --------- | ------ | ------------ | ------ |
+|      | human     | koala  | cateleppattt |        |
+|      | this      | horse  | dog          | monkey |
+| 0 -  |           | hat    |              |        |
+|      | he        |        |              |        |
+| -1   |           | him    | man          |        |
+|      | sher uncl |        | woman        | boy    |
+| -2 - |           |        | girl         |        |
+| -2   | -1        | 0      | 1            | 2      |
+
+Figure: Visualize skip-gram trained on Wikipedia (1B tokens) (fastext.cc) 66 vectors with PCA
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Intrinsic Evaluation of Word Embeddings
+
+# How to measure similarity in the word embedding space?
+
+- Cosine Similarity
+sim(w1, w2) = cos(Xw1, Xw2) = $\frac{Xw1 \cdot Xw2}{\|Xw1\| \|Xw2\|}$
+- L2 Distance
+sim(w1, w2) = L2(Xw1, Xw2) = $\|Xw1 - Xw2\|$
+
+67
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Intrinsic Evaluation of Word Embeddings
+
+# Nearest-Neighbor with the cosine similarity (skip-gram trained on Wikipedia (1B tokens))
+
+| Word  | Score | Word       | Score | Word   | Score |
+| ----- | ----- | ---------- | ----- | ------ | ----- |
+| moon  |       | talking    |       | blue   |       |
+| mars  | 0.615 | discussing | 0.663 | red    | 0.704 |
+| moons | 0.611 | telling    | 0.657 | yellow | 0.677 |
+| lunar | 0.602 | joking     | 0.632 | purple | 0.676 |
+| sun   | 0.602 | thinking   | 0.627 | green  | 0.655 |
+| venus | 0.583 | talked     | 0.624 | pink   | 0.612 |
+
+68
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Intrinsic Evaluation of Word Embeddings
+
+We can compare the similarity between words in the embedding space with human judgment
+
+1. Collect Human Judgment (or download dataset e.g. WordSim353) on a list of pairs of words
+2. Compute similarity of the word vectors of those pairs
+3. Measure correlation between both
+
+| Word 1 | Word 2 | Word2vec Cosine Similarity | Human Judgment |
+| ------ | ------ | -------------------------- | -------------- |
+| tiger  | tiger  | 1.0                        | 10             |
+| dollar | buck   | 0.3065                     | 9.22           |
+| dollar | profit | 0.3420                     | 7.38           |
+| smart  | stupid | 0.4128                     | 5.81           |
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Application of Word Embeddings
+
+- Downstream Tasks (Lecture 5 and 6)
+- Word Sense Induction
+- Semantic analysis (semantic shift in time, across communities...)
+
+70
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Representing Documents With Vectors
+
+71
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Representing Documents into Vectors
+
+Similarly to what we saw for word-level representation we can represent documents into vectors
+
+1. Using word vectors
+2. Count-Based Representations
+3. Generative Probabilistic Graphical Model (e.g. LDA seen in the lab)
+4. Using language models
+
+72
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Representation of documents based on words
+
+Based on word vectors representing sentence/document with vector can be done in a straightforward way with:
+
+- Given sequence of word represented by x1, .., xn, define f: → R
+
+[x1,., n] → f (x1,., xn)
+
+For instance:
+
+[x1,., n]  1 ∑xi
+
+73
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Count-Based Representation of Documents
+
+Given a Corpus made of novels of Shakespeare (Macbeth, Hamlet…), each document is a novel here:
+
+1. Get the vocabulary of the Corpus
+2. Compute the Count-Based Matrix at the document-level
+
+74
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Count-Based Representation of Documents
+
+Given a Corpus made of novels of Shakespeare (Macbeth, Hamlet…), each document is a novel here:
+
+1. Get the vocabulary of the Corpus
+2. Compute the Count-Based Matrix at the document-level
+
+Build the term-frequency matrix
+
+tf,t,d = |{t  d}|
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Count-Based Representation of Documents
+
+Given a Corpus made of novels of Shakespeare (Macbeth, Hamlet…), each document is a novel here:
+
+1. Get the vocabulary of the Corpus
+2. Compute the Count-Based Matrix at the document-level
+
+|           | Antony and Cleopatra | Julius Caesar | The Tempest | Hamlet | Othello | Macbeth |
+| --------- | -------------------- | ------------- | ----------- | ------ | ------- | ------- |
+| Antony    | 157                  | 73            | 0           | 0      | 0       | 0       |
+| Brutus    | 4                    | 157           | 0           | 1      | 0       | 0       |
+| Caesar    | 232                  | 227           | 0           | 2      | 1       | 1       |
+| Calpurnia | 0                    | 10            | 0           | 0      | 0       | 0       |
+| Cleopatra | 57                   | 0             | 0           | 0      | 0       | 0       |
+| mercy     | 2                    | 0             | 3           | 5      | 5       | 1       |
+| worser    | 2                    | 0             | 1           | 1      | 1       | 0       |
+
+76
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Count-Based Representation of Documents
+
+|           | Antony and Cleopatra | Julius Caesar | The Tempest | Hamlet | Othello | Macbeth |
+| --------- | -------------------- | ------------- | ----------- | ------ | ------- | ------- |
+| Antony    | 157                  | 73            | 0           | 0      | 0       | 0       |
+| Brutus    | 4                    | 157           | 0           | 1      | 0       | 0       |
+| Caesar    | 232                  | 227           | 0           | 2      | 1       | 1       |
+| Calpurnia | 0                    | 10            | 0           | 0      | 0       | 0       |
+| Cleopatra | 57                   | 0             | 0           | 0      | 0       | 0       |
+| mercy     | 2                    | 0             | 3           | 5      | 5       | 1       |
+| worser    | 2                    | 0             |             | 1      | 1       | 0       |
+
+➔ We get a vector representation for each document of the corpus
+
+NB: such a model is called a bag-of-word model because the ordering of the words in each document does not matter
+
+77
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Count-Based Representation of Documents
+
+# Limits:
+
+High sensitivity to frequent words OR to very infrequent words
+
+# How to improve?
+
+- A word that is in all documents of the corpus (e.g. “the”) is not informative at all for the document representation, still it impacts the document vector
+- A word that is in only 1 document is likely to be very informative of the document
+
+# Solution:
+
+- Weight the count with
+- Inverse Document Frequency
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Count-Based Representation of Documents
+
+Weighting the importance of each term with the document frequency
+
+Definition: Given N the total number of documents, a term t (token),
+
+idft,C = log(  |C| / |{d  C, s.t. t  d}|)
+
+NB: Compute the log to smooth the impact of words that are in only a few documents
+
+79
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# TF-IDF Representation of Documents
+
+Matrix becomes: tf*idf(t,d,C)
+
+|           | Antony and Cleopatra | Julius Caesar | The Tempest | Hamlet | Othello | Macbeth |
+| --------- | -------------------- | ------------- | ----------- | ------ | ------- | ------- |
+| Antony    | 5.25                 | 3.18          | 0           | 0      | 0       | 0.35    |
+| Brutus    | 1.21                 | 6.1           | 0           | 1      | 0       | 0       |
+| Caesar    | 8.59                 | 2.54          | 0           | 1.51   | 0.25    | 0       |
+| Calpurnia | 0                    | 1.54          | 0           | 0      | 0       | 0       |
+| Cleopatra | 2.85                 | 0             | 0           | 0      | 0       | 0       |
+| mercy     | 1.51                 | 0             | 1.9         | 0.12   | 5.25    | 0.88    |
+| worser    | 1.37                 | 0             | 0.11        | 4.15   | 0.25    | 1.95    |
+
+80
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# TF-IDF Representation of Documents
+
+We can then apply dimension reduction technique to get dense vectors
+
+➔ E.g. we can apply SVD: Latent Semantic Analysis
+
+81
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Session Summary: Representing text with Vectors
+
+1. Word as 1-hot vectors (// or indexes)
+2. Hand-Crafted approach (e.g. Wordnet)
+3. Word Vectors inferred with data using the distributional hypothesis:
+
+
+
+
+
+Representing Text with Vectors - Machine Learning for NLP ENSAE Paris 2022 (2/6) - Benjamin Muller
+
+# Bibliography and Acknowledgment
+
+- Distributional Semantics, Evert 2015
+- Foundations of Distributional Semantics, Evert &#x26; Lenci 2009
+- Stanford Information-Retrieval Book
+
+83
